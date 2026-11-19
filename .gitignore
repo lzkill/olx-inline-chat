@@ -1,0 +1,5 @@
+# pacote gerado por ./build.sh
+dist/
+
+# gerado pelo Chrome ao carregar a extensao descompactada
+_metadata/
