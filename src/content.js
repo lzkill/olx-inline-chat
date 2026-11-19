@@ -56,7 +56,16 @@
   function savePrefs() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      chrome.storage.local.set({ [STORAGE_KEY]: prefs }).catch(() => {});
+      // Quando a extensao e recarregada (ou atualizada/desativada) com esta aba
+      // aberta, o content script antigo continua vivo mas perde a ponte com ela.
+      // Ai chrome.storage lanca "Extension context invalidated" de forma SINCRONA,
+      // antes de existir promise — por isso .catch() nao segurava, e a excecao
+      // escapava de dentro do setTimeout.
+      try {
+        if (!chrome.runtime?.id) return;
+        const done = chrome.storage.local.set({ [STORAGE_KEY]: prefs });
+        if (done && typeof done.catch === 'function') done.catch(() => {});
+      } catch (_) {}
     }, 150);
   }
 
